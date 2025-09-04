@@ -54,6 +54,7 @@ void kernel_main(void) {
         uint32_t current_time = get_timer_ticks();
         
         // keyboard input (always responsive)
+        handle_keyboard_input(); // Handle special key combinations
         char key = get_key();
         if (key) {
             handle_input(key);

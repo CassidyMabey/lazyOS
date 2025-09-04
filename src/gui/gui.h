@@ -24,6 +24,13 @@ struct Window {
     int drag_offset_x;
     int drag_offset_y;
     int z_index;         // stacking
+    int is_maximized;    // window is fullscreen
+    int is_minimized;    // window is minimized
+    // Store original dimensions for restore
+    int orig_x;
+    int orig_y;
+    int orig_width;
+    int orig_height;
     struct Window* next; 
 };
 
@@ -31,6 +38,10 @@ struct Window {
 extern Window* window_list;
 extern Window* dragging_window;
 extern Window* hovered_window;
+
+// global menu state
+extern int menu_hover_index;
+extern int menu_visible;
 
 // layout
 // taskbar icons
@@ -57,15 +68,13 @@ Window* create_window(int x, int y, int width, int height, const char* title);
 void draw_window(int x, int y, int width, int height, const char* title);
 void redraw_windows(void);
 void handle_input(char key);
-void toggle_settings_sidebar(void);
-void draw_settings_sidebar(void);
+void show_menu_options(int x, int y);
+void handle_menu_click(int mouse_x, int mouse_y);
 KeyboardLayout get_current_layout(void);
 void set_keyboard_layout(KeyboardLayout layout);
 
 void handle_mouse_input(void);
 void check_window_interaction(int mouse_x, int mouse_y, uint8_t buttons);
 void bring_window_to_front(Window* win);
-void create_menu_window(void);
-void close_menu_window(void);
 
 #endif

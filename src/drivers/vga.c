@@ -127,6 +127,15 @@ void draw_window_with_hover(int x, int y, int width, int height, const char* tit
     // title bar colors for hover effect
     uint8_t title_bg = is_hovered ? VGA_BLUE : VGA_BLACK;
     uint8_t title_fg = is_hovered ? VGA_YELLOW : VGA_WHITE;
+
+    // Draw window control buttons on the right side of title bar
+    uint8_t button_color = VGA_WHITE;
+    // Close button (X)
+    putchar_at('x', button_color, x + width - 2, y);
+    // Maximize button (□)
+    putchar_at(0xFE, button_color, x + width - 4, y);  // Using a square character
+    // Minimize button (_)
+    putchar_at('_', button_color, x + width - 6, y);
     
     for (int i = x + 1; i < x + width - 1; i++) {
         putchar_at(' ', (title_bg << 4) | title_fg, i, y);

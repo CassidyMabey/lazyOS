@@ -80,6 +80,7 @@ Three layouts are supported:
 Change layouts through the settings sidebar (ESC to open).
 
 
+
 ## Future Plans
 
 - [ ] Add color customization
