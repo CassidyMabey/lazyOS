@@ -30,10 +30,12 @@ done
 echo "Finding source files..."
 SOURCES=()
 
+# add kernel first
 if [ -f "kernel.c" ]; then
     SOURCES+=("kernel.c")
 fi
 
+# find all source files
 while IFS= read -r -d '' file; do
     if [ "$(basename "$file")" != "kernel.c" ]; then
         SOURCES+=("$file")

@@ -1,12 +1,86 @@
+#include "mouse.h"
+#include "../drivers/mouse.h"
+#include "../drivers/vga.h"
+#include "gui.h"
+#include "gui_constants.h"
+
+// get windows from gui
+extern Window* window_list;
+
 void handle_mouse_input(void) {
     MouseState mouse = get_mouse_state();
     check_window_interaction(mouse.x, mouse.y, mouse.buttons);
 }
 
-void check_window_interaction(int mouse_x, int mouse_y, uint8_t buttons) {
-    static int last_click_x = 0;
-    static int last_click_y = 0;
+void check_taskbar_click(int mouse_x, int mouse_y, uint8_t buttons) {
+    if (mouse_y != TASKBAR_Y) return;
     
+    if (buttons & MOUSE_LEFT_BTN) {
+        int icon_x = 0;
+        for (IconType i = ICON_TYPE_FILES; i < ICON_TYPE_COUNT; i++) {
+            if (mouse_x >= icon_x && mouse_x < icon_x + ICON_WIDTH) {
+                // make window if clicked twice
+                if (i == active_icon) {
+                    // make window
+                    const char* title = "";
+                    switch (i) {
+                        case ICON_TYPE_NONE:
+                            // skip none
+                            break;
+                        case ICON_TYPE_FILES:
+                            title = "Files";
+                            break;
+                        case ICON_TYPE_CMD:
+                            title = "Command";
+                            break;
+                        case ICON_TYPE_SETTINGS:
+                            title = "Settings";
+                            break;
+                        case ICON_TYPE_COUNT:
+                            // ignore count case
+                            break;
+                    }
+                    create_window(20, 5, 40, 15, title);
+                    active_icon = ICON_TYPE_NONE;  // unset active
+                } else {
+                    active_icon = i;  // set as active
+                }
+                draw_desktop();
+                redraw_windows();
+                return;
+            }
+            icon_x += ICON_WIDTH;
+        }
+    }
+}
+
+void check_window_interaction(int mouse_x, int mouse_y, uint8_t buttons) {
+    // check taskbar first
+    check_taskbar_click(mouse_x, mouse_y, buttons);
+    
+    // track hovering
+    Window* prev_hovered = hovered_window;
+    hovered_window = NULL;
+    
+    // find hovered window
+    Window* current = window_list;
+    while (current) {
+        if (mouse_x >= current->x && 
+            mouse_x < current->x + current->width &&
+            mouse_y >= current->y && 
+            mouse_y < current->y + current->height) {
+            hovered_window = current;
+            break;
+        }
+        current = current->next;
+    }
+    
+    // redraw if changed
+    if (prev_hovered != hovered_window) {
+        draw_desktop();
+        redraw_windows();
+    }
+
     // dragging
     if (dragging_window) {
         if (buttons & MOUSE_LEFT_BTN) {
@@ -68,8 +142,4 @@ void check_window_interaction(int mouse_x, int mouse_y, uint8_t buttons) {
             current = current->next;
         }
     }
-    
-    // store last click pos
-    last_click_x = mouse_x;
-    last_click_y = mouse_y;
 }

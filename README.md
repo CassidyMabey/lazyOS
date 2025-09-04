@@ -79,40 +79,6 @@ Three layouts are supported:
 
 Change layouts through the settings sidebar (ESC to open).
 
-## Project Structure
-
-```
-lazyOS/
-├── src/
-│   ├── drivers/
-│   │   ├── keyboard.c/h    # Keyboard input handling
-│   │   ├── mouse.c/h       # Mouse input handling
-│   │   └── vga.c/h        # Display output
-│   ├── gui/
-│   │   ├── gui.c/h        # Window management
-│   │   ├── mouse.c        # Mouse interaction
-│   │   └── settings.c     # Settings sidebar
-│   └── memory/
-│       └── memory.c/h     # Memory management
-├── kernel.c               # Main kernel
-├── multiboot.h           # Multiboot header
-├── linker.ld             # Linker script
-└── build.sh              # Build script
-```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is open source and available under the MIT License.
-
-## Acknowledgments
-
-- Thanks to the OSDev community for their valuable resources
-- GRUB2 project for the bootloader
-- All contributors and testers
 
 ## Future Plans
 

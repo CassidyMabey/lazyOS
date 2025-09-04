@@ -94,9 +94,10 @@ void handle_mouse_packet(void) {
             }
             y_mov = -y_mov; 
 
-            // update pos 
-            mouse_state.x += x_mov;
-            mouse_state.y += y_mov;
+            // update pos with bounds checking and increased sensitivity
+            mouse_state.x += x_mov * 2;  // Doubled sensitivity for wider screen
+            mouse_state.y += y_mov * 2;  // Doubled sensitivity for taller screen
+
 
             // stop from escaping from the screen (need to change if multiple moniters.)
             if (mouse_state.x < 0) mouse_state.x = 0;
