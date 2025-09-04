@@ -4,19 +4,19 @@
 #include <stdint.h>
 #include <system.h>
 
-// Mouse ports
+// mouse port
 #define MOUSE_DATA_PORT    0x60
 #define MOUSE_STATUS_PORT  0x64
 #define MOUSE_CMD_PORT     0x64
 
-// Mouse commands
+// mouse commands
 #define MOUSE_WRITE       0xD4
 #define MOUSE_READ        0x20
 #define MOUSE_ENABLE      0xA8
 #define MOUSE_DEFAULTS    0xF6
 #define MOUSE_ENABLE_PKT  0xF4
 
-// Mouse packet flags
+// mouse buttons & flags
 #define MOUSE_LEFT_BTN    0x01
 #define MOUSE_RIGHT_BTN   0x02
 #define MOUSE_MIDDLE_BTN  0x04

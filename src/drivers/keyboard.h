@@ -5,11 +5,11 @@
 #include <system.h>
 #include "../gui/gui.h"
 
-// Keyboard controller ports
+// controller ports
 #define KBD_DATA_PORT 0x60
 #define KBD_STATUS_PORT 0x64
 
-// Special keys
+// special keys
 #define KEY_ENTER 0x1C
 #define KEY_BACKSPACE 0x0E
 #define KEY_SPACE 0x39

@@ -1,6 +1,6 @@
 #include "memory.h"
 
-#define HEAP_SIZE 1024*1024  // 1MB heap
+#define HEAP_SIZE 1024*1024  // 1mb
 #define BLOCK_SIZE sizeof(BlockHeader)
 
 typedef struct BlockHeader {
@@ -24,7 +24,7 @@ void* malloc(size_t size) {
     BlockHeader* best_fit = NULL;
     size_t smallest_viable_size = HEAP_SIZE + 1;
 
-    // Find best fit block
+    // best fit
     while (current) {
         if (current->is_free && current->size >= size) {
             if (current->size < smallest_viable_size) {
@@ -37,7 +37,7 @@ void* malloc(size_t size) {
 
     if (!best_fit) return NULL;
 
-    // Split block if it's too big
+    // split if its too big
     if (best_fit->size > size + BLOCK_SIZE + 4) {
         BlockHeader* new_block = (BlockHeader*)((uint8_t*)best_fit + BLOCK_SIZE + size);
         new_block->size = best_fit->size - size - BLOCK_SIZE;
@@ -58,13 +58,13 @@ void free(void* ptr) {
     BlockHeader* header = (BlockHeader*)((uint8_t*)ptr - BLOCK_SIZE);
     header->is_free = 1;
 
-    // Merge with next block if it's free
+    // join it to teh next block
     if (header->next && header->next->is_free) {
         header->size += BLOCK_SIZE + header->next->size;
         header->next = header->next->next;
     }
 
-    // Find previous block to merge if it's free
+    // previous block
     BlockHeader* current = head;
     while (current && current->next != header) {
         current = current->next;

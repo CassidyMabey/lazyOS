@@ -37,16 +37,16 @@ void check_window_interaction(int mouse_x, int mouse_y, uint8_t buttons) {
         return;
     }
 
-    // Check for new window interactions
+    // check for interaction with the window
     if (buttons & MOUSE_LEFT_BTN) {
         Window* current = window_list;
         while (current) {
-            // Check if click is in title bar
+            // title bar
             if (mouse_y == current->y && 
                 mouse_x >= current->x && 
                 mouse_x < current->x + current->width) {
                 
-                // Start dragging
+                // draggings
                 current->is_dragging = 1;
                 current->drag_offset_x = mouse_x - current->x;
                 current->drag_offset_y = mouse_y - current->y;
@@ -55,7 +55,7 @@ void check_window_interaction(int mouse_x, int mouse_y, uint8_t buttons) {
                 break;
             }
             
-            // Check if click is inside window
+            // check for clicks inside window
             if (mouse_x >= current->x && 
                 mouse_x < current->x + current->width &&
                 mouse_y >= current->y && 
@@ -69,7 +69,7 @@ void check_window_interaction(int mouse_x, int mouse_y, uint8_t buttons) {
         }
     }
     
-    // Store last click position
+    // store last click pos
     last_click_x = mouse_x;
     last_click_y = mouse_y;
 }

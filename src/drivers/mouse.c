@@ -37,11 +37,11 @@ static uint8_t mouse_read(void) {
 void init_mouse(void) {
     uint8_t status;
 
-    // Enable the auxiliary mouse device
+    // mouse device
     mouse_wait(1);
     outb(MOUSE_CMD_PORT, MOUSE_ENABLE);
 
-    // Enable interrupts
+    // interruptes
     mouse_wait(1);
     outb(MOUSE_CMD_PORT, MOUSE_READ);
     mouse_wait(0);
@@ -51,11 +51,11 @@ void init_mouse(void) {
     mouse_wait(1);
     outb(MOUSE_DATA_PORT, status);
 
-    // Set defaults and enable packet streaming
+    // streaming
     mouse_write(MOUSE_DEFAULTS);
     mouse_write(MOUSE_ENABLE_PKT);
 
-    // Reset mouse position
+    // mouse pos
     mouse_state.x = VGA_WIDTH / 2;
     mouse_state.y = VGA_HEIGHT / 2;
 }
@@ -78,27 +78,27 @@ void handle_mouse_packet(void) {
             mouse_packet[2] = data;
             mouse_cycle = 0;
 
-            // Update mouse state
+            // mouse state
             mouse_state.buttons = mouse_packet[0] & 0x07;
 
-            // Handle X movement
+            // x
             int x_mov = mouse_packet[1];
             if (mouse_packet[0] & MOUSE_X_SIGN) {
                 x_mov |= 0xFFFFFF00;
             }
             
-            // Handle Y movement (inverted)
+            // y 
             int y_mov = mouse_packet[2];
             if (mouse_packet[0] & MOUSE_Y_SIGN) {
                 y_mov |= 0xFFFFFF00;
             }
-            y_mov = -y_mov;  // Invert Y axis
+            y_mov = -y_mov; 
 
-            // Update position with bounds checking
+            // update pos 
             mouse_state.x += x_mov;
             mouse_state.y += y_mov;
 
-            // Clamp coordinates
+            // stop from escaping from the screen (need to change if multiple moniters.)
             if (mouse_state.x < 0) mouse_state.x = 0;
             if (mouse_state.y < 0) mouse_state.y = 0;
             if (mouse_state.x >= VGA_WIDTH) mouse_state.x = VGA_WIDTH - 1;
