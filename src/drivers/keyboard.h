@@ -2,6 +2,7 @@
 #define KEYBOARD_H
 
 #include <stdint.h>
+#include <system.h>
 #include "../gui/gui.h"
 
 // Keyboard controller ports
@@ -15,10 +16,9 @@
 #define KEY_ESC 0x01
 #define KEY_TAB 0x0F
 
-uint8_t inb(uint16_t port);
-char scancode_to_ascii(uint8_t scancode);
-void init_keyboard(void);
-char get_key(void);
-char convert_scancode_to_layout(uint8_t scancode, KeyboardLayout layout);
+extern void init_keyboard(void);
+extern char scancode_to_ascii(uint8_t scancode);
+extern char get_key(void);
+extern char convert_scancode_to_layout(uint8_t scancode, KeyboardLayout layout);
 
 #endif

@@ -2,13 +2,14 @@
 #define VGA_H
 
 #include <stdint.h>
+#include <system.h>
 
-// VGA buffer constants
+// buffer
 #define VGA_BUFFER 0xB8000
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
 
-// Colors
+// colors
 #define VGA_BLACK 0
 #define VGA_BLUE 1
 #define VGA_GREEN 2
@@ -26,10 +27,11 @@
 #define VGA_LIGHT_BROWN 14
 #define VGA_WHITE 15
 
-void init_vga(void);
-void clear_screen(void);
-void putchar_at(char c, uint8_t color, int x, int y);
-void draw_box(int x1, int y1, int x2, int y2, uint8_t color);
-void draw_window(int x, int y, int width, int height, const char* title);
+extern void init_vga(void);
+extern void clear_screen(void);
+extern void putchar_at(char c, uint8_t color, int x, int y);
+extern void putchar(char c); 
+extern void draw_box(int x1, int y1, int x2, int y2, uint8_t color);
+extern void draw_window(int x, int y, int width, int height, const char* title);
 
 #endif

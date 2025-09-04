@@ -1,13 +1,19 @@
 #include "gui.h"
 #include "../drivers/vga.h"
 #include "../drivers/keyboard.h"
+#include <string.h>
 
 #define SETTINGS_WIDTH 20
 #define SETTINGS_HEIGHT 10
 #define SETTINGS_X (VGA_WIDTH - SETTINGS_WIDTH)
 #define SETTINGS_Y 0
 
-static const char* layout_names[] = {
+// Global variables
+static int settings_visible = 0;
+static KeyboardLayout current_layout = LAYOUT_QWERTY;
+
+// Layout name strings
+static const char* const layout_names[] = {
     "QWERTY",
     "DVORAK",
     "AZERTY"
@@ -35,8 +41,8 @@ void draw_settings_sidebar(void) {
     }
 
     // Draw layout options
-    for (int i = 0; i < 3; i++) {
-        char marker = (get_current_layout() == i) ? '>' : ' ';
+    for (size_t i = 0; i < sizeof(layout_names) / sizeof(layout_names[0]); i++) {
+        char marker = (get_current_layout() == (KeyboardLayout)i) ? '>' : ' ';
         putchar_at(marker, (VGA_LIGHT_GREY << 4) | VGA_BLACK, SETTINGS_X + 2, SETTINGS_Y + 4 + i);
         
         const char* layout = layout_names[i];
@@ -60,8 +66,11 @@ KeyboardLayout get_current_layout(void) {
 }
 
 void set_keyboard_layout(KeyboardLayout layout) {
-    current_layout = layout;
-    if (settings_visible) {
-        draw_settings_sidebar();
+    if (layout >= LAYOUT_QWERTY && layout <= LAYOUT_AZERTY) {
+        current_layout = layout;
+        // Redraw the settings sidebar if it's visible
+        if (settings_visible) {
+            draw_settings_sidebar();
+        }
     }
 }
