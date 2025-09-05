@@ -9,7 +9,6 @@
 #define SETTINGS_Y 0
 
 static int settings_visible = 0;
-static KeyboardLayout current_layout = LAYOUT_QWERTY;
 
 // layout names
 static const char* const layout_names[] = {

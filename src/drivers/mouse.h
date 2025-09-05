@@ -34,5 +34,6 @@ typedef struct {
 extern void init_mouse(void);
 extern void handle_mouse_packet(void);
 extern MouseState get_mouse_state(void);
+extern void set_mouse_position(int x, int y);
 
 #endif

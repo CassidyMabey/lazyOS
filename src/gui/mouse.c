@@ -8,37 +8,53 @@
 // get windows from gui
 extern Window* window_list;
 
+// Forward declaration
+void check_taskbar_click(int mouse_x, int mouse_y, uint8_t buttons);
+
 // gui functions we need
 extern void show_menu_options(int x, int y);
 extern void handle_menu_click(int mouse_x, int mouse_y);
 extern Window* create_window(int x, int y, int width, int height, const char* title);
 extern void draw_desktop(void);
 extern void redraw_windows(void);
+extern void draw_taskbar(void);
 
 void handle_mouse_input(void) {
     MouseState mouse = get_mouse_state();
+    static uint8_t prev_buttons = 0;
     
-    // Store previous menu state
-    int prev_menu_hover = menu_hover_index;
-    
-    // Reset menu hover state
-    menu_hover_index = -1;
-    
-    // Check if mouse is in menu area and menu is visible
-    if (menu_visible && 
-        mouse.x >= 0 && mouse.x < 15 && 
-        mouse.y >= VGA_HEIGHT - 4 && mouse.y < VGA_HEIGHT - 1) {
-        
-        // Calculate which menu item is being hovered
-        menu_hover_index = mouse.y - (VGA_HEIGHT - 4);
-        
-        // Redraw menu if hover state changed
-        if (prev_menu_hover != menu_hover_index) {
-            show_menu_options(0, VGA_HEIGHT - 4);
-        }
+    // Bounds checking to prevent crashes
+    if (mouse.x < 0 || mouse.x >= VGA_WIDTH || mouse.y < 0 || mouse.y >= VGA_HEIGHT) {
+        return; // Invalid mouse position
     }
     
-    check_window_interaction(mouse.x, mouse.y, mouse.buttons);
+    // Update mouse cursor position
+    update_mouse_cursor(mouse.x, mouse.y);
+    
+    // Check for button state changes
+    if ((mouse.buttons & MOUSE_LEFT_BTN) && !(prev_buttons & MOUSE_LEFT_BTN)) {
+        // Left button just pressed
+        outb(0x3F8, 'L'); outb(0x3F8, 'C'); outb(0x3F8, 'K'); outb(0x3F8, '\n');
+        
+        // Add safety checks before calling functions that might crash
+        outb(0x3F8, 'S'); outb(0x3F8, 'A'); outb(0x3F8, 'F'); outb(0x3F8, 'E'); outb(0x3F8, '\n');
+        
+        // TODO: Re-enable these after fixing potential crashes
+        // check_window_interaction(mouse.x, mouse.y, mouse.buttons);
+        // check_taskbar_click(mouse.x, mouse.y, mouse.buttons);
+    }
+    
+    if ((mouse.buttons & MOUSE_RIGHT_BTN) && !(prev_buttons & MOUSE_RIGHT_BTN)) {
+        // Right button just pressed  
+        outb(0x3F8, 'R'); outb(0x3F8, 'C'); outb(0x3F8, 'K'); outb(0x3F8, '\n');
+        // Add right-click handling here if needed
+    }
+    
+    // Store previous button state
+    prev_buttons = mouse.buttons;
+    
+    // Simplified handling - disable all hover and complex interactions for now
+    // This prevents crashes while we debug
 }
 
 void check_taskbar_click(int mouse_x, int mouse_y, uint8_t buttons) {
@@ -55,7 +71,7 @@ void check_taskbar_click(int mouse_x, int mouse_y, uint8_t buttons) {
     }
     
     if (buttons & MOUSE_LEFT_BTN) {
-        // check menu button (0-6)
+        // check menu button " Menu " (positions 0-5)
         if (mouse_x >= 0 && mouse_x < 6) {
             // Toggle menu visibility
             menu_visible = !menu_visible;
@@ -68,7 +84,7 @@ void check_taskbar_click(int mouse_x, int mouse_y, uint8_t buttons) {
             return;
         }
         
-        // check settings button (6-16) 
+        // check settings button " Settings " (positions 6-15)
         if (mouse_x >= 6 && mouse_x < 16) {
             // make settings window
             create_window(30, 5, 25, 10, "Settings");
@@ -194,8 +210,41 @@ void check_window_interaction(int mouse_x, int mouse_y, uint8_t buttons) {
     
     // Handle click on window
     if (buttons & MOUSE_LEFT_BTN && clicked_window) {
-        // Check for window control buttons first
-        handle_window_controls(clicked_window, mouse_x, mouse_y);
+        // Bring window to front
+        bring_window_to_front(clicked_window);
+        
+        // Check if clicking on title bar for dragging
+        if (mouse_y == clicked_window->y) {
+            // Check for window control buttons first
+            int control_handled = 0;
+            
+            // Check close button (x)
+            if (mouse_x == clicked_window->x + clicked_window->width - 2) {
+                handle_window_controls(clicked_window, mouse_x, mouse_y);
+                control_handled = 1;
+            }
+            // Check maximize button (□)
+            else if (mouse_x == clicked_window->x + clicked_window->width - 4) {
+                handle_window_controls(clicked_window, mouse_x, mouse_y);
+                control_handled = 1;
+            }
+            // Check minimize button (_)
+            else if (mouse_x == clicked_window->x + clicked_window->width - 6) {
+                handle_window_controls(clicked_window, mouse_x, mouse_y);
+                control_handled = 1;
+            }
+            
+            // If no control button was clicked, start dragging
+            if (!control_handled) {
+                clicked_window->is_dragging = 1;
+                clicked_window->drag_offset_x = mouse_x - clicked_window->x;
+                clicked_window->drag_offset_y = mouse_y - clicked_window->y;
+                dragging_window = clicked_window;
+            }
+        }
+        
+        draw_desktop();
+        redraw_windows();
     }
     
     // redraw if hover changed
@@ -232,62 +281,5 @@ void check_window_interaction(int mouse_x, int mouse_y, uint8_t buttons) {
             dragging_window = NULL;
         }
         return;
-    }
-
-    // check for interaction with the window
-    if (buttons & MOUSE_LEFT_BTN) {
-        Window* current = window_list;
-        Window* clicked_window = NULL;
-        
-        // Find the topmost window that was clicked
-        while (current) {
-            if (!current->is_minimized &&
-                mouse_x >= current->x && 
-                mouse_x < current->x + current->width &&
-                mouse_y >= current->y && 
-                mouse_y < current->y + current->height) {
-                clicked_window = current;
-                break; // First window found is the topmost
-            }
-            current = current->next;
-        }
-        
-        if (clicked_window) {
-            // Bring window to front
-            bring_window_to_front(clicked_window);
-            
-            // Check if clicking on title bar for dragging
-            if (mouse_y == clicked_window->y) {
-                // Check for window control buttons first
-                int control_handled = 0;
-                
-                // Check close button (x)
-                if (mouse_x == clicked_window->x + clicked_window->width - 2) {
-                    handle_window_controls(clicked_window, mouse_x, mouse_y);
-                    control_handled = 1;
-                }
-                // Check maximize button (□)
-                else if (mouse_x == clicked_window->x + clicked_window->width - 4) {
-                    handle_window_controls(clicked_window, mouse_x, mouse_y);
-                    control_handled = 1;
-                }
-                // Check minimize button (_)
-                else if (mouse_x == clicked_window->x + clicked_window->width - 6) {
-                    handle_window_controls(clicked_window, mouse_x, mouse_y);
-                    control_handled = 1;
-                }
-                
-                // If no control button was clicked, start dragging
-                if (!control_handled) {
-                    clicked_window->is_dragging = 1;
-                    clicked_window->drag_offset_x = mouse_x - clicked_window->x;
-                    clicked_window->drag_offset_y = mouse_y - clicked_window->y;
-                    dragging_window = clicked_window;
-                }
-            }
-            
-            draw_desktop();
-            redraw_windows();
-        }
     }
 }
